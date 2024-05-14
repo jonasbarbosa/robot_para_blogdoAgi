@@ -1,0 +1,44 @@
+name: Testes Automatizados para o portal do blog do Agi
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  executar_testes:
+    name: Testes Automatizados
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do Código
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11.0'
+
+    - name: Instalar Dependências Python
+      run: |
+        pip install -r requirements.txt
+
+    - name: Iniciar Browser Library
+      run: |
+        rfbrowser init
+
+    - name: Executar Testes Robot Framework
+      run: |
+        xvfb-run python3 -m robot -d Results stepDefinitions/
+
+    - name: Publicar Report Robot Framework
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-reports
+        path: Results/report.html
+
+    - name: Publicar no GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets._TOKEN }}
+        publish_dir: Results
